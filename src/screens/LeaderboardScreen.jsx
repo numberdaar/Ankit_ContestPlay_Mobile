@@ -8,13 +8,21 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
+/**
+ * TopThreePodium Component
+ * Displays the top 3 performers in a visual podium layout
+ * @param {array} topThree - Array of top 3 participants
+ * @param {object} currentUser - Current user data
+ */
 const TopThreePodium = ({ topThree, currentUser }) => (
   <View style={styles.podiumContainer}>
+    {/* Podium Header */}
     <View style={styles.podiumHeader}>
       <Text style={styles.podiumTitle}>Top Performers</Text>
       <Text style={styles.podiumSubtitle}>Leading the competition</Text>
@@ -29,7 +37,7 @@ const TopThreePodium = ({ topThree, currentUser }) => (
           </View>
           <Text style={styles.podiumRank}>2</Text>
           <Image
-            source={{ uri: topThree[1].avatar || 'https://via.placeholder.com/60x60/6366f1/ffffff?text=U' }}
+            source={topThree[1].avatar || require('../../assets/images/avatar2.jpg')}
             style={styles.podiumAvatar}
           />
           <Text style={styles.podiumName} numberOfLines={1}>
@@ -48,7 +56,7 @@ const TopThreePodium = ({ topThree, currentUser }) => (
           </View>
           <Text style={styles.podiumRank}>1</Text>
           <Image
-            source={{ uri: topThree[0].avatar || 'https://via.placeholder.com/60x60/f59e0b/ffffff?text=U' }}
+            source={topThree[0].avatar || require('../../assets/images/avatar1.jpg')}
             style={styles.podiumAvatar}
           />
           <Text style={styles.podiumName} numberOfLines={1}>
@@ -67,7 +75,7 @@ const TopThreePodium = ({ topThree, currentUser }) => (
           </View>
           <Text style={styles.podiumRank}>3</Text>
           <Image
-            source={{ uri: topThree[2].avatar || 'https://via.placeholder.com/60x60/10b981/ffffff?text=U' }}
+            source={topThree[2].avatar || require('../../assets/images/avatar3.jpg')}
             style={styles.podiumAvatar}
           />
           <Text style={styles.podiumName} numberOfLines={1}>
@@ -81,11 +89,20 @@ const TopThreePodium = ({ topThree, currentUser }) => (
   </View>
 );
 
+/**
+ * LeaderboardItem Component
+ * Renders an individual participant in the leaderboard list
+ * @param {object} participant - Participant data object
+ * @param {number} index - Position in the leaderboard
+ * @param {boolean} isCurrentUser - Whether this is the current user
+ * @param {function} onPress - Function to handle when item is pressed
+ */
 const LeaderboardItem = ({ participant, index, isCurrentUser, onPress }) => (
   <TouchableOpacity
     style={[styles.leaderboardItem, isCurrentUser && styles.currentUserItem]}
     onPress={onPress}
   >
+    {/* Rank Display */}
     <View style={styles.rankContainer}>
       {index < 3 ? (
         <View style={[styles.topRankBadge, { backgroundColor: getTopRankColor(index) }]}>
@@ -96,72 +113,57 @@ const LeaderboardItem = ({ participant, index, isCurrentUser, onPress }) => (
       )}
     </View>
     
+    {/* Participant Avatar */}
     <Image
-      source={{ uri: participant.avatar || 'https://via.placeholder.com/40x40/6366f1/ffffff?text=U' }}
+      source={participant.avatar || require('../../assets/images/avatar4.jpg')}
       style={styles.participantAvatar}
     />
     
+    {/* Participant Information */}
     <View style={styles.participantInfo}>
-      <Text style={[
-        styles.participantName,
-        isCurrentUser && styles.currentUserName,
-      ]}>
+      <Text style={[styles.participantName, isCurrentUser && styles.currentUserName]}>
         {participant.name}
       </Text>
-      {isCurrentUser && (
-        <Text style={styles.currentUserLabel}>You</Text>
-      )}
-      <Text style={styles.participantLocation}>
-        {participant.location || 'Unknown Location'}
-      </Text>
-    </View>
-    
-    <View style={styles.scoreContainer}>
-      <Text style={[
-        styles.scoreText,
-        isCurrentUser && styles.currentUserScoreText,
-      ]}>
-        {participant.score}
-      </Text>
-      <Text style={styles.scoreLabel}>pts</Text>
-      
+      <Text style={styles.participantLocation}>{participant.location}</Text>
       {participant.badge && (
-        <View style={[styles.badge, { backgroundColor: getBadgeColor(participant.badge) }]}>
+        <View style={styles.badgeContainer}>
           <Text style={styles.badgeText}>{participant.badge}</Text>
         </View>
       )}
     </View>
     
-    {isCurrentUser && (
-      <View style={styles.currentUserIndicator}>
-        <Ionicons name="star" size={16} color="#f59e0b" />
-      </View>
-    )}
+    {/* Score Display */}
+    <View style={styles.scoreContainer}>
+      <Text style={[styles.scoreText, isCurrentUser && styles.currentUserScoreText]}>
+        {participant.score}
+      </Text>
+      <Text style={styles.scoreLabel}>pts</Text>
+    </View>
   </TouchableOpacity>
 );
 
+/**
+ * Utility function to get colors for top 3 ranks
+ * @param {number} index - Position in top 3 (0, 1, or 2)
+ * @returns {string} Hex color code for the rank
+ */
 const getTopRankColor = (index) => {
   const colors = ['#f59e0b', '#6366f1', '#10b981'];
   return colors[index] || '#6b7280';
 };
 
-const getBadgeColor = (badge) => {
-  const badgeColors = {
-    'Speed Demon': '#ef4444',
-    'Accuracy Master': '#10b981',
-    'Perfect Score': '#f59e0b',
-    'First Timer': '#6366f1',
-    'Comeback King': '#8b5cf6',
-  };
-  return badgeColors[badge] || '#6b7280';
-};
-
-export default function LeaderboardScreen({ route, navigation }) {
+/**
+ * Main LeaderboardScreen Component
+ * Displays comprehensive leaderboards with rankings, achievements, and user highlighting
+ * @param {object} navigation - Navigation object for screen transitions
+ */
+export default function LeaderboardScreen({ navigation }) {
+  // State for managing contest selection and leaderboard data
   const [selectedContest, setSelectedContest] = useState(null);
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Mock data for demonstration
+  // Mock data for contests
   const mockContests = [
     {
       id: '1',
@@ -183,12 +185,13 @@ export default function LeaderboardScreen({ route, navigation }) {
     },
   ];
 
+  // Mock leaderboard data with dummy avatars
   const mockLeaderboard = [
     {
       id: '1',
       name: 'Alex Johnson',
       score: 95,
-      avatar: 'https://via.placeholder.com/40x40/6366f1/ffffff?text=A',
+      avatar: require('../../assets/images/avatar1.jpg'),
       location: 'San Francisco, CA',
       badge: 'Perfect Score',
       isCurrentUser: false,
@@ -197,7 +200,7 @@ export default function LeaderboardScreen({ route, navigation }) {
       id: '2',
       name: 'Sarah Chen',
       score: 92,
-      avatar: 'https://via.placeholder.com/40x40/10b981/ffffff?text=S',
+      avatar: require('../../assets/images/avatar2.jpg'),
       location: 'New York, NY',
       badge: 'Accuracy Master',
       isCurrentUser: false,
@@ -206,7 +209,7 @@ export default function LeaderboardScreen({ route, navigation }) {
       id: '3',
       name: 'Mike Davis',
       score: 89,
-      avatar: 'https://via.placeholder.com/40x40/f59e0b/ffffff?text=M',
+      avatar: require('../../assets/images/avatar3.jpg'),
       location: 'Austin, TX',
       badge: 'Speed Demon',
       isCurrentUser: false,
@@ -215,7 +218,7 @@ export default function LeaderboardScreen({ route, navigation }) {
       id: '4',
       name: 'Emma Wilson',
       score: 87,
-      avatar: 'https://via.placeholder.com/40x40/ef4444/ffffff?text=E',
+      avatar: require('../../assets/images/avatar4.jpg'),
       location: 'Seattle, WA',
       isCurrentUser: false,
     },
@@ -223,7 +226,7 @@ export default function LeaderboardScreen({ route, navigation }) {
       id: '5',
       name: 'David Lee',
       score: 85,
-      avatar: 'https://via.placeholder.com/40x40/8b5cf6/ffffff?text=D',
+      avatar: require('../../assets/images/avatar1.jpg'),
       location: 'Boston, MA',
       isCurrentUser: false,
     },
@@ -231,7 +234,7 @@ export default function LeaderboardScreen({ route, navigation }) {
       id: '6',
       name: 'Lisa Rodriguez',
       score: 83,
-      avatar: 'https://via.placeholder.com/40x40/06b6d4/ffffff?text=L',
+      avatar: require('../../assets/images/avatar2.jpg'),
       location: 'Miami, FL',
       isCurrentUser: false,
     },
@@ -239,7 +242,7 @@ export default function LeaderboardScreen({ route, navigation }) {
       id: '7',
       name: 'James Brown',
       score: 81,
-      avatar: 'https://via.placeholder.com/40x40/84cc16/ffffff?text=J',
+      avatar: require('../../assets/images/avatar3.jpg'),
       location: 'Chicago, IL',
       isCurrentUser: false,
     },
@@ -247,7 +250,7 @@ export default function LeaderboardScreen({ route, navigation }) {
       id: '8',
       name: 'You',
       score: 78,
-      avatar: 'https://via.placeholder.com/40x40/f59e0b/ffffff?text=Y',
+      avatar: require('../../assets/images/avatar4.jpg'),
       location: 'Your Location',
       isCurrentUser: true,
     },
@@ -255,7 +258,7 @@ export default function LeaderboardScreen({ route, navigation }) {
       id: '9',
       name: 'Anna Kim',
       score: 76,
-      avatar: 'https://via.placeholder.com/40x40/ec4899/ffffff?text=A',
+      avatar: require('../../assets/images/avatar1.jpg'),
       location: 'Portland, OR',
       isCurrentUser: false,
     },
@@ -263,12 +266,13 @@ export default function LeaderboardScreen({ route, navigation }) {
       id: '10',
       name: 'Tom Anderson',
       score: 74,
-      avatar: 'https://via.placeholder.com/40x40/14b8a6/ffffff?text=T',
+      avatar: require('../../assets/images/avatar2.jpg'),
       location: 'Denver, CO',
       isCurrentUser: false,
     },
   ];
 
+  // Initialize data when component mounts
   useEffect(() => {
     // Set default contest and leaderboard data
     if (mockContests.length > 0) {
@@ -283,31 +287,44 @@ export default function LeaderboardScreen({ route, navigation }) {
     }
   }, []);
 
-  const handleContestSelect = (contest) => {
+  /**
+   * Handles contest selection change
+   * @param {object} contest - Selected contest object
+   */
+  const handleContestChange = (contest) => {
     setSelectedContest(contest);
-    // In a real app, you would fetch leaderboard data for the selected contest
+    // In a real app, fetch leaderboard data for the selected contest
+    setLeaderboardData(mockLeaderboard);
   };
 
+  /**
+   * Handles when a leaderboard item is pressed
+   * @param {object} participant - Selected participant data
+   */
   const handleParticipantPress = (participant) => {
-    // In a real app, you might show participant details or profile
+    // Navigate to participant profile or show details
     console.log('Participant pressed:', participant.name);
   };
 
-  const topThree = leaderboardData.slice(0, 3);
-  const remainingParticipants = leaderboardData.slice(3);
+  /**
+   * Gets the top 3 participants for the podium display
+   * @returns {array} Array of top 3 participants
+   */
+  const getTopThree = () => {
+    return leaderboardData.slice(0, 3);
+  };
 
-  if (!selectedContest) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  /**
+   * Gets the remaining participants for the list display
+   * @returns {array} Array of remaining participants
+   */
+  const getRemainingParticipants = () => {
+    return leaderboardData.slice(3);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header Section */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Leaderboard</Text>
         <Text style={styles.headerSubtitle}>See how you rank against others</Text>
@@ -315,56 +332,36 @@ export default function LeaderboardScreen({ route, navigation }) {
 
       {/* Contest Selector */}
       <View style={styles.contestSelector}>
-        <Text style={styles.contestSelectorTitle}>Select Contest</Text>
+        <Text style={styles.contestSelectorLabel}>Select Contest:</Text>
         <FlatList
           horizontal
           data={mockContests}
           keyExtractor={(item) => item.id}
-          showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={[
                 styles.contestOption,
-                selectedContest.id === item.id && styles.selectedContestOption,
+                selectedContest?.id === item.id && styles.selectedContestOption,
               ]}
-              onPress={() => handleContestSelect(item)}
+              onPress={() => handleContestChange(item)}
             >
               <Text style={[
                 styles.contestOptionText,
-                selectedContest.id === item.id && styles.selectedContestOptionText,
+                selectedContest?.id === item.id && styles.selectedContestOptionText,
               ]}>
                 {item.title}
               </Text>
-              <Text style={[
-                styles.contestOptionCategory,
-                selectedContest.id === item.id && styles.selectedContestOptionCategory,
-              ]}>
-                {item.category}
-              </Text>
             </TouchableOpacity>
           )}
-          contentContainerStyle={styles.contestSelectorContent}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.contestSelectorList}
         />
       </View>
 
-      {/* Contest Info */}
-      <View style={styles.contestInfo}>
-        <View style={styles.contestInfoLeft}>
-          <Text style={styles.contestName}>{selectedContest.title}</Text>
-          <Text style={styles.contestCategory}>{selectedContest.category}</Text>
-        </View>
-        <View style={styles.contestInfoRight}>
-          <Ionicons name="people-outline" size={20} color="#6366f1" />
-          <Text style={styles.participantCount}>
-            {selectedContest.participants.toLocaleString()} participants
-          </Text>
-        </View>
-      </View>
+      {/* Top 3 Podium */}
+      <TopThreePodium topThree={getTopThree()} currentUser={currentUser} />
 
-      {/* Top Three Podium */}
-      <TopThreePodium topThree={topThree} currentUser={currentUser} />
-
-      {/* Full Leaderboard */}
+      {/* Leaderboard List */}
       <View style={styles.leaderboardSection}>
         <View style={styles.leaderboardHeader}>
           <Text style={styles.leaderboardTitle}>All Participants</Text>
@@ -372,9 +369,9 @@ export default function LeaderboardScreen({ route, navigation }) {
             {leaderboardData.length} total participants
           </Text>
         </View>
-
+        
         <FlatList
-          data={remainingParticipants}
+          data={getRemainingParticipants()}
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => (
             <LeaderboardItem
@@ -388,22 +385,6 @@ export default function LeaderboardScreen({ route, navigation }) {
           contentContainerStyle={styles.leaderboardList}
         />
       </View>
-
-      {/* Current User Summary */}
-      {currentUser && (
-        <View style={styles.currentUserSummary}>
-          <View style={styles.currentUserInfo}>
-            <Text style={styles.currentUserTitle}>Your Performance</Text>
-            <Text style={styles.currentUserRank}>
-              Rank #{leaderboardData.findIndex(p => p.isCurrentUser) + 1} of {leaderboardData.length}
-            </Text>
-          </View>
-          <View style={styles.currentUserScore}>
-            <Text style={styles.currentUserScoreValue}>{currentUser.score}</Text>
-            <Text style={styles.currentUserScoreLabel}>points</Text>
-          </View>
-        </View>
-      )}
     </SafeAreaView>
   );
 }
@@ -444,14 +425,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
   },
-  contestSelectorTitle: {
+  contestSelectorLabel: {
     fontSize: 16,
     fontWeight: '600',
     color: '#1e293b',
     marginBottom: 12,
     paddingHorizontal: 20,
   },
-  contestSelectorContent: {
+  contestSelectorList: {
     paddingHorizontal: 20,
   },
   contestOption: {
@@ -617,11 +598,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    } : Platform.OS === 'ios' ? {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    } : {
+      elevation: 2,
+    }),
   },
   currentUserItem: {
     backgroundColor: '#fef3c7',
@@ -691,7 +677,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6b7280',
   },
-  badge: {
+  badgeContainer: {
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,

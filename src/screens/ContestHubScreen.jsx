@@ -7,15 +7,20 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+/**
+ * Mock contest data for demonstration purposes
+ * In a real application, this would come from an API
+ */
 const mockContests = [
   {
     id: '1',
     title: 'Tech Trivia Challenge',
     description: 'Test your knowledge in technology and win amazing prizes!',
-    image: 'https://via.placeholder.com/300x200/6366f1/ffffff?text=Tech+Trivia',
+    image: require('../../assets/images/contest1.jpg'),
     participants: 1250,
     entryFee: 5,
     isFree: false,
@@ -26,7 +31,7 @@ const mockContests = [
     id: '2',
     title: 'Creative Photography Contest',
     description: 'Showcase your photography skills and creativity',
-    image: 'https://via.placeholder.com/300x200/10b981/ffffff?text=Photography',
+    image: require('../../assets/images/contest2.jpg'),
     participants: 890,
     entryFee: 0,
     isFree: true,
@@ -37,7 +42,7 @@ const mockContests = [
     id: '3',
     title: 'Math Puzzle Championship',
     description: 'Solve complex mathematical puzzles against the clock',
-    image: 'https://via.placeholder.com/300x200/f59e0b/ffffff?text=Math+Puzzle',
+    image: require('../../assets/images/contest3.jpg'),
     participants: 567,
     entryFee: 10,
     isFree: false,
@@ -48,7 +53,7 @@ const mockContests = [
     id: '4',
     title: 'Gaming Tournament',
     description: 'Compete in the ultimate mobile gaming championship',
-    image: 'https://via.placeholder.com/300x200/ef4444/ffffff?text=Gaming',
+    image: require('../../assets/images/contest4.jpg'),
     participants: 2100,
     entryFee: 15,
     isFree: false,
@@ -57,19 +62,32 @@ const mockContests = [
   },
 ];
 
+/**
+ * ContestCard Component
+ * Renders an individual contest card with image, title, description, and metadata
+ * @param {object} contest - Contest data object containing all contest information
+ * @param {function} onPress - Function to handle when card is pressed
+ */
 const ContestCard = ({ contest, onPress }) => (
   <TouchableOpacity style={styles.contestCard} onPress={onPress}>
-    <Image source={{ uri: contest.image }} style={styles.contestImage} />
+    {/* Contest Image - Using local dummy images */}
+    <Image source={contest.image} style={styles.contestImage} />
+    
     <View style={styles.contestInfo}>
+      {/* Contest Header with Title and Category Badge */}
       <View style={styles.contestHeader}>
         <Text style={styles.contestTitle}>{contest.title}</Text>
         <View style={[styles.categoryBadge, { backgroundColor: getCategoryColor(contest.category) }]}>
           <Text style={styles.categoryText}>{contest.category}</Text>
         </View>
       </View>
+      
+      {/* Contest Description */}
       <Text style={styles.contestDescription} numberOfLines={2}>
         {contest.description}
       </Text>
+      
+      {/* Contest Metadata (Participants, End Date, Entry Fee) */}
       <View style={styles.contestMeta}>
         <View style={styles.metaItem}>
           <Ionicons name="people-outline" size={16} color="#6b7280" />
@@ -86,6 +104,8 @@ const ContestCard = ({ contest, onPress }) => (
           </Text>
         </View>
       </View>
+      
+      {/* View Details Button */}
       <View style={styles.viewDetailsButton}>
         <Text style={styles.viewDetailsText}>View Details</Text>
         <Ionicons name="chevron-forward" size={16} color="#6366f1" />
@@ -94,6 +114,11 @@ const ContestCard = ({ contest, onPress }) => (
   </TouchableOpacity>
 );
 
+/**
+ * Utility function to get category-specific colors
+ * @param {string} category - The contest category
+ * @returns {string} Hex color code for the category
+ */
 const getCategoryColor = (category) => {
   const colors = {
     Technology: '#6366f1',
@@ -104,20 +129,33 @@ const getCategoryColor = (category) => {
   return colors[category] || '#6b7280';
 };
 
+/**
+ * Main ContestHubScreen Component
+ * Displays a list of available contests for users to browse and select
+ * @param {object} navigation - Navigation object for screen transitions
+ */
 export default function ContestHubScreen({ navigation }) {
+  // State to store contests data
   const [contests] = useState(mockContests);
 
+  /**
+   * Handles when a contest card is pressed
+   * Navigates to the ContestDetail screen with contest data
+   * @param {object} contest - The selected contest object
+   */
   const handleContestPress = (contest) => {
     navigation.navigate('ContestDetail', { contest });
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header Section */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Discover Contests</Text>
         <Text style={styles.headerSubtitle}>Join exciting challenges and win prizes</Text>
       </View>
       
+      {/* Contest List */}
       <FlatList
         data={contests}
         keyExtractor={(item) => item.id}
@@ -159,14 +197,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    } : Platform.OS === 'ios' ? {
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+    } : {
+      elevation: 3,
+    }),
   },
   contestImage: {
     width: '100%',

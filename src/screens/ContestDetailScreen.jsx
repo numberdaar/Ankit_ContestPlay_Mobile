@@ -8,11 +8,19 @@ import {
   Image,
   SafeAreaView,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
+/**
+ * TabButton Component
+ * Renders a clickable tab button with active/inactive states
+ * @param {string} title - The text to display on the tab
+ * @param {boolean} isActive - Whether this tab is currently selected
+ * @param {function} onPress - Function to call when tab is pressed
+ */
 const TabButton = ({ title, isActive, onPress }) => (
   <TouchableOpacity
     style={[styles.tabButton, isActive && styles.activeTabButton]}
@@ -24,11 +32,23 @@ const TabButton = ({ title, isActive, onPress }) => (
   </TouchableOpacity>
 );
 
+/**
+ * DetailsTab Component
+ * Displays the main contest information including image, description, and join button
+ * @param {object} contest - Contest data object containing all contest information
+ * @param {function} onJoinPress - Function to handle when join button is pressed
+ */
 const DetailsTab = ({ contest, onJoinPress }) => (
   <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-    <Image source={{ uri: contest.image }} style={styles.contestImage} />
+    {/* Contest Image - Using dummy image for demonstration */}
+    <Image 
+      source={require('../../assets/images/contest1.jpg')} 
+      style={styles.contestImage} 
+      defaultSource={require('../../assets/images/contest1.jpg')}
+    />
     
     <View style={styles.detailsContainer}>
+      {/* Contest Header with Title and Category Badge */}
       <View style={styles.contestHeader}>
         <Text style={styles.contestTitle}>{contest.title}</Text>
         <View style={[styles.categoryBadge, { backgroundColor: getCategoryColor(contest.category) }]}>
@@ -36,8 +56,10 @@ const DetailsTab = ({ contest, onJoinPress }) => (
         </View>
       </View>
       
+      {/* Contest Description */}
       <Text style={styles.contestDescription}>{contest.description}</Text>
       
+      {/* Information Grid showing key contest details */}
       <View style={styles.infoGrid}>
         <View style={styles.infoItem}>
           <Ionicons name="calendar-outline" size={24} color="#6366f1" />
@@ -66,6 +88,7 @@ const DetailsTab = ({ contest, onJoinPress }) => (
         </View>
       </View>
       
+      {/* Join Contest Button */}
       <TouchableOpacity style={styles.joinButton} onPress={onJoinPress}>
         <Text style={styles.joinButtonText}>Join Now</Text>
         <Ionicons name="arrow-forward" size={20} color="#fff" />
@@ -74,7 +97,13 @@ const DetailsTab = ({ contest, onJoinPress }) => (
   </ScrollView>
 );
 
+/**
+ * LeaderboardTab Component
+ * Displays the current contest rankings with user highlighting
+ * @param {object} contest - Contest data object
+ */
 const LeaderboardTab = ({ contest }) => {
+  // Mock leaderboard data - in real app this would come from API
   const mockLeaderboard = [
     { rank: 1, name: 'Alex Johnson', score: 95, isCurrentUser: false },
     { rank: 2, name: 'Sarah Chen', score: 92, isCurrentUser: false },
@@ -87,11 +116,13 @@ const LeaderboardTab = ({ contest }) => {
   return (
     <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
       <View style={styles.leaderboardContainer}>
+        {/* Leaderboard Header */}
         <View style={styles.leaderboardHeader}>
           <Text style={styles.leaderboardTitle}>Top Participants</Text>
           <Text style={styles.leaderboardSubtitle}>Current standings</Text>
         </View>
         
+        {/* Render each participant in the leaderboard */}
         {mockLeaderboard.map((participant, index) => (
           <View
             key={index}
@@ -100,6 +131,7 @@ const LeaderboardTab = ({ contest }) => {
               participant.isCurrentUser && styles.currentUserItem,
             ]}
           >
+            {/* Rank Display */}
             <View style={styles.rankContainer}>
               <Text style={[
                 styles.rankText,
@@ -110,6 +142,7 @@ const LeaderboardTab = ({ contest }) => {
               </Text>
             </View>
             
+            {/* Participant Information */}
             <View style={styles.participantInfo}>
               <Text style={[
                 styles.participantName,
@@ -122,6 +155,7 @@ const LeaderboardTab = ({ contest }) => {
               )}
             </View>
             
+            {/* Score Display */}
             <View style={styles.scoreContainer}>
               <Text style={[
                 styles.scoreText,
@@ -138,9 +172,15 @@ const LeaderboardTab = ({ contest }) => {
   );
 };
 
+/**
+ * RulesTab Component
+ * Displays contest rules, eligibility, and terms in organized sections
+ * @param {object} contest - Contest data object
+ */
 const RulesTab = ({ contest }) => (
   <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
     <View style={styles.rulesContainer}>
+      {/* Eligibility Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Eligibility</Text>
         <Text style={styles.sectionText}>
@@ -151,6 +191,7 @@ const RulesTab = ({ contest }) => (
         </Text>
       </View>
       
+      {/* Judging Criteria Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Judging Criteria</Text>
         <Text style={styles.sectionText}>
@@ -160,6 +201,7 @@ const RulesTab = ({ contest }) => (
         </Text>
       </View>
       
+      {/* Terms & Conditions Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Terms & Conditions</Text>
         <Text style={styles.sectionText}>
@@ -170,6 +212,7 @@ const RulesTab = ({ contest }) => (
         </Text>
       </View>
       
+      {/* Prize Distribution Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Prize Distribution</Text>
         <Text style={styles.sectionText}>
@@ -183,10 +226,23 @@ const RulesTab = ({ contest }) => (
   </ScrollView>
 );
 
+/**
+ * Main ContestDetailScreen Component
+ * Manages the tab navigation and renders appropriate content based on active tab
+ * @param {object} route - Navigation route object containing contest data
+ * @param {object} navigation - Navigation object for screen transitions
+ */
 export default function ContestDetailScreen({ route, navigation }) {
+  // Extract contest data from navigation route
   const { contest } = route.params;
+  
+  // State to track which tab is currently active
   const [activeTab, setActiveTab] = useState('details');
 
+  /**
+   * Handles the join button press
+   * Routes to ContestPlay for free contests or Payment for paid contests
+   */
   const handleJoinPress = () => {
     if (contest.isFree) {
       navigation.navigate('ContestPlay', { contest });
@@ -195,6 +251,10 @@ export default function ContestDetailScreen({ route, navigation }) {
     }
   };
 
+  /**
+   * Renders the appropriate tab content based on activeTab state
+   * @returns {JSX.Element} The component to render for the active tab
+   */
   const renderTabContent = () => {
     switch (activeTab) {
       case 'details':
@@ -210,6 +270,7 @@ export default function ContestDetailScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Tab Navigation Bar */}
       <View style={styles.tabContainer}>
         <TabButton
           title="Details"
@@ -228,11 +289,17 @@ export default function ContestDetailScreen({ route, navigation }) {
         />
       </View>
       
+      {/* Render the active tab content */}
       {renderTabContent()}
     </SafeAreaView>
   );
 }
 
+/**
+ * Utility function to get category-specific colors
+ * @param {string} category - The contest category
+ * @returns {string} Hex color code for the category
+ */
 const getCategoryColor = (category) => {
   const colors = {
     Technology: '#6366f1',
@@ -324,11 +391,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    } : Platform.OS === 'ios' ? {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    } : {
+      elevation: 2,
+    }),
   },
   infoLabel: {
     fontSize: 14,
@@ -348,11 +420,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#6366f1',
     paddingVertical: 16,
     borderRadius: 12,
-    shadowColor: '#6366f1',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 4px 8px rgba(99, 102, 241, 0.3)',
+    } : Platform.OS === 'ios' ? {
+      shadowColor: '#6366f1',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+    } : {
+      elevation: 4,
+    }),
   },
   joinButtonText: {
     fontSize: 18,
@@ -384,11 +461,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    } : Platform.OS === 'ios' ? {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    } : {
+      elevation: 2,
+    }),
   },
   currentUserItem: {
     backgroundColor: '#fef3c7',
@@ -451,11 +533,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    } : Platform.OS === 'ios' ? {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    } : {
+      elevation: 2,
+    }),
   },
   sectionTitle: {
     fontSize: 18,
